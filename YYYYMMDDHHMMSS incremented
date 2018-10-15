@@ -115,7 +115,22 @@ PROPER_TIME()
 }
 
 
+### Above Proper time function is to increment the date as per arithmetic operation but making sure it obeys the time format logic like
+### Seconds don't go beyond 60 similar for minutes, hours days, months and years
+## Also Leap years have been taken care of while incrementing
+
 CURDATE=`date +"%y%m%d%H%M%S"`
 NXTDATE=`expr $DATE_FIRST + 60`
 TIMESTAMP=$(PROPER_TIME "$NXTDATE")
 echo $TIMESTAMP
+
+
+##### Another approach to just incrment present time ####
+$ date
+ Mon Oct 15 08:06:57 EDT 2018
+
+$ date --date='+'5' days' +"%Y/%m/%d-%H-%M-%S.00"
+2018/10/20-08-07-01.00
+
+$ date --date='+'1' seconds' +"%Y/%m/%d-%H-%M-%S.00"
+2018/10/15-08-07-16.00
