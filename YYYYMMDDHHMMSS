@@ -1,0 +1,119 @@
+
+
+PROPER_TIME()
+{
+       TIMESTAMP=$1
+
+## logic to convert the incermented time to proper time format
+            if [[ "$TIMESTAMP" -eq 0 ]]; then
+            return;
+            else
+                            S=`expr $TIMESTAMP % 10`
+
+                            SS_LAST=`expr  $TIMESTAMP % 100`
+                            SS_TENS=`expr  $SS_LAST - $S`
+                            SS=`expr  $SS_TENS / 10`
+
+## if SS is greater than 60 then add 1 to M2
+
+                            if [[ "$SS_LAST" -ge 60 ]]; then
+                                  diff=`expr $SS_LAST - 60`
+                                  add=`expr 100 + $diff`
+                                 TIMESTAMP=`expr $TIMESTAMP - $SS_LAST + $add`
+                            fi
+
+                            S=`expr $TIMESTAMP % 10`
+
+                            SS_LAST=`expr  $TIMESTAMP % 100`
+                            SS_TENS=`expr  $SS_LAST - $S`
+                            SS=`expr  $SS_TENS / 10`
+
+                            MSS_LAST=`expr  $TIMESTAMP % 1000`
+                            MSS_TENS=`expr  $MSS_LAST - $SS_LAST`
+                            MSS=`expr  $MSS_TENS / 100`
+
+                            MMSS_LAST=`expr  $TIMESTAMP % 10000`
+                            MMSS_TENS=`expr  $MMSS_LAST - $SS_LAST`
+                            MM=`expr $MMSS_LAST / 100`
+
+## if MM is greater than 60 then add 1 to H2
+
+                            if [[ "$MM" -ge 60 ]]; then
+                                  diff=`expr $MM - 60`
+                                  add=`expr 100 + $diff`
+                                  MMADD=`expr $add  \* 100`
+                                 TIMESTAMP=`expr $TIMESTAMP - $MMSS_TENS + $MMADD`
+                            fi
+
+                            MMSS_LAST=`expr  $TIMESTAMP % 10000`
+
+                            HMMSS_LAST=`expr  $TIMESTAMP % 100000`
+                            HMMSS_TENS=`expr  $HMMSS_LAST - $MMSS_LAST`
+                            H1=`expr  $HMMSS_TENS / 10000`
+
+                            HHMMSS_LAST=`expr  $TIMESTAMP % 1000000`
+                            HHMMSS_TENS=`expr  $HHMMSS_LAST - $HMMSS_LAST`
+                            H2=`expr  $HHMMSS_TENS / 100000`
+                            HH=`expr $H2 \* 10 + $H1`
+
+## if HH is greater than 24 then add 1 to D2
+                            if [[ "$HH" -eq 24 ]]; then
+                                  add=760000;
+                                 TIMESTAMP=`expr $TIMESTAMP + $add`
+                            fi
+
+##  DD MM YYYY logic
+## Increment Year
+## if  YYYYMMDDHHMMSS= 11111231235XXX then this becomes 11120000000XXX
+                         MSS_LAST=`expr  $TIMESTAMP % 1000`
+                          MMDD_LAST=`expr $TIMESTAMP % 10000000000`
+                          MMDDHHM_TENS=`expr $MMDD_LAST - $MSS_LAST`
+                          MMDDHHM=`expr $MMDDHHM_TENS / 1000`
+                        if [[ "$MMDDHHM" -eq 1231235 ]]; then
+                           add=8869765000;
+                           TIMESTAMP=`expr $TIMESTAMP + $add`
+                        fi
+
+## Increment Month and Day
+
+# 28 Days Month increment to March
+                        MSS_LAST=`expr  $TIMESTAMP % 1000`
+                        MMDD_LAST=`expr $TIMESTAMP % 10000000000`
+                        MMDDHHM_TENS=`expr $MMDD_LAST - $MSS_LAST`
+                        MMDDHHM=`expr $MMDDHHM_TENS / 1000`
+
+                      if [[ "$MMDDHHM" -eq 0228235 ]]; then
+                         add=72765000;
+                         TIMESTAMP=`expr $TIMESTAMP + $add`
+                      fi
+
+#30 Days Months 04,06,09,11 increment to next month 1 st day
+                       MSS_LAST=`expr  $TIMESTAMP % 1000`
+                       MMDD_LAST=`expr $TIMESTAMP % 10000000000`
+                       MMDDHHM_TENS=`expr $MMDD_LAST - $MSS_LAST`
+                       MMDDHHM=`expr $MMDDHHM_TENS / 1000`
+
+
+                if [[ "$MMDDHHM" -eq 0430235 || "$MMDDHHM" -eq 0630235 || "$MMDDHHM" -eq 0930235 || "$MMDDHHM" -eq 1130235  ]]; then
+                   add=70765000;
+                   TIMESTAMP=`expr $TIMESTAMP + $add`
+                fi
+
+#31 days months 01,03,05,07,08,10 increment to next month 1 st day
+                       MSS_LAST=`expr  $TIMESTAMP % 1000`
+                       MMDD_LAST=`expr $TIMESTAMP % 10000000000`
+                       MMDDHHM_TENS=`expr $MMDD_LAST - $MSS_LAST`
+                       MMDDHHM=`expr $MMDDHHM_TENS / 1000`
+
+       if [[ "$MMDDHHM" -eq 0131235 || "$MMDDHHM" -eq 0331235 || "$MMDDHHM" -eq 0531235 || "$MMDDHHM" -eq 0731235 || "$MMDDHHM" -eq 0831235 || "$MMDDHHM" -eq 1031235 ]]; then
+                   add=69765000;
+                   TIMESTAMP=`expr $TIMESTAMP + $add`
+            fi
+
+            echo "$TIMESTAMP"
+            fi
+}
+
+ NXTDATE=`date +"%y%m%d%H%M%S"`
+TIMESTAMP=$(PROPER_TIME "$NXTDATE")
+echo $TIMESTAMP
