@@ -114,6 +114,8 @@ PROPER_TIME()
             fi
 }
 
- NXTDATE=`date +"%y%m%d%H%M%S"`
+
+CURDATE=`date +"%y%m%d%H%M%S"`
+NXTDATE=`expr $DATE_FIRST + 60`
 TIMESTAMP=$(PROPER_TIME "$NXTDATE")
 echo $TIMESTAMP
